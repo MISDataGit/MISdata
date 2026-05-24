@@ -39,6 +39,8 @@ Imports:
     xts,
     zoo
 Suggests:
-    patchwork
+    patchwork,
+    testthat (>= 3.0.0)
 URL: https://github.com/MISDataGit/MISdata
 BugReports: https://github.com/MISDataGit/MISdata/issues
+Config/testthat/edition: 3
