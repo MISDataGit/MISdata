@@ -1,0 +1,44 @@
+Package: MISdata
+Title: MIS Suite for Stock Data Analysis
+Version: 0.1.0
+Authors@R: c(
+    person("MISDataGit", role = "cre",
+           email = "misveri2026@gmail.com",
+           comment = c(GitHub = "MISDataGit")),
+    person("Batuhan", "Karaköy", role = "aut",
+           email = "bkarakoy0@gmail.com"),
+    person("Enes", "Türkoğlu", role = "aut",
+           email = "enestrkgl98@gmail.com"),
+    person("Metehan", "Kaygısız", role = "aut",
+           email = "metehankaygsz@yahoo.com.tr"))
+Description: Provides an end-to-end pipeline for stock-market data
+    workflows in pure R. Index constituents are scraped from
+    'Wikipedia' and OHLCV history is pulled from 'Yahoo Finance'.
+    Analysis utilities cover NA cleaning, time-series format conversion
+    via 'tsbox', period aggregation with an OHLCV-aware mode, exploratory
+    data analysis (line plots, ACF / PACF, STL decomposition) and
+    ARIMA-based forecasting with multi-level confidence bands.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.1.0)
+Imports:
+    anytime,
+    dplyr,
+    forecast,
+    ggplot2,
+    quantmod,
+    rlang,
+    rvest,
+    stringr,
+    tidyr,
+    tsbox,
+    tsibble,
+    xts,
+    zoo
+Suggests:
+    patchwork
+URL: https://github.com/MISDataGit/MISdata
+BugReports: https://github.com/MISDataGit/MISdata/issues

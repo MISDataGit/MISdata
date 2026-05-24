@@ -1,0 +1,8 @@
+^MISdata_PROJECT_GUIDE\.md$
+^guideline\.md$
+^\.DS_Store$
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^\.git$
+^LICENSE\.md$
