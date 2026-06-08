@@ -18,12 +18,29 @@ test_that("get_acf returns a data.frame with lag/acf/symbol columns", {
   expect_equal(nrow(tbl), 20)
 })
 
+test_that("get_acf is calculated from simple returns", {
+  prices <- c(100, 103, 101, 106, 104, 109, 107, 113, 110, 116, 114, 121)
+  d <- data.frame(
+    Date = seq(as.Date("2024-01-01"), by = "day", length.out = length(prices)),
+    Symbol = "AAA",
+    Column = "Close",
+    Value = prices
+  )
+
+  tbl <- get_acf(d, symbols = "AAA", lag_max = 4)
+  returns <- diff(prices) / prices[-length(prices)]
+  expected <- as.numeric(stats::acf(returns, lag.max = 4, plot = FALSE)$acf)[-1]
+
+  expect_equal(tbl$acf, expected)
+})
+
 test_that("get_acf with plot = TRUE returns list(table, plot)", {
   d <- make_long_df(symbols = "AAA", columns = "Close", n_days = 60)
   res <- get_acf(d, symbols = "AAA", lag_max = 15, plot = TRUE)
   expect_type(res, "list")
   expect_named(res, c("table", "plot"))
   expect_s3_class(res$plot, "ggplot")
+  expect_equal(res$plot$labels$title, "ACF of Close Returns")
 })
 
 test_that("get_pacf returns a data.frame with pacf column", {
@@ -33,9 +50,32 @@ test_that("get_pacf returns a data.frame with pacf column", {
   expect_true(all(c("lag", "pacf", "symbol") %in% colnames(tbl)))
 })
 
+test_that("get_pacf is calculated from simple returns", {
+  prices <- c(100, 103, 101, 106, 104, 109, 107, 113, 110, 116, 114, 121)
+  d <- data.frame(
+    Date = seq(as.Date("2024-01-01"), by = "day", length.out = length(prices)),
+    Symbol = "AAA",
+    Column = "Close",
+    Value = prices
+  )
+
+  tbl <- get_pacf(d, symbols = "AAA", lag_max = 4)
+  returns <- diff(prices) / prices[-length(prices)]
+  expected <- as.numeric(stats::pacf(returns, lag.max = 4, plot = FALSE)$acf)
+
+  expect_equal(tbl$pacf, expected)
+})
+
 test_that("get_acf errors when symbols is NULL", {
   d <- make_long_df(symbols = "AAA", columns = "Close", n_days = 60)
   expect_error(get_acf(d, symbols = NULL), "symbols")
+})
+
+test_that("ACF and PACF require enough observations to analyze returns", {
+  d <- make_long_df(symbols = "AAA", columns = "Close", n_days = 2)
+
+  expect_error(get_acf(d, symbols = "AAA"), "At least three observations")
+  expect_error(get_pacf(d, symbols = "AAA"), "At least three observations")
 })
 
 test_that("get_acf warns when more than 5 symbols supplied", {

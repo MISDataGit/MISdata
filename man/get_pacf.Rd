@@ -11,7 +11,8 @@ get_pacf(data, symbols = NULL, column = "Close", lag_max = 40, plot = FALSE)
 
 \item{symbols}{character vector. One or more symbols (max 5). Required.}
 
-\item{column}{character. Series to use. Default: "Close".}
+\item{column}{character. Series from which simple returns are calculated.
+Default: "Close".}
 
 \item{lag_max}{integer. Maximum lag. Default: 40.}
 
@@ -23,8 +24,10 @@ faceted ggplot. Default: FALSE (table only).}
 \code{plot = TRUE} : \code{list(table = data.frame, plot = ggplot)}.
 }
 \description{
-Computes PACF values for one or more symbols and returns them as a long
-data.frame. Optionally produces a faceted bar-chart visualization.
+Calculates simple returns from the selected series and computes PACF values
+for one or more symbols. Results are returned as a long data.frame, with an
+optional faceted bar-chart visualization. Returns are calculated as
+\eqn{r_t = (x_t / x_{t-1}) - 1}.
 }
 \examples{
 \dontrun{

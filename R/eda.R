@@ -115,11 +115,23 @@
            "'. Run clean_stock() before ", toupper(type), "computation.")
     }
 
+    if (length(values) < 3) {
+      stop("At least three observations are required to analyze returns for ",
+           "symbol '", sym, "'.")
+    }
+
+    returns <- diff(values) / values[-length(values)]
+    if (any(!is.finite(returns))) {
+      stop("Returns for symbol '", sym,
+           "' contain non-finite values. Check the selected series for zeros ",
+           "or non-finite observations.")
+    }
+
     if (type == "acf") {
-      res  <- stats::acf(values, lag.max = lag_max, plot = FALSE)
+      res  <- stats::acf(returns, lag.max = lag_max, plot = FALSE)
       vals <- as.numeric(res$acf)[-1]   # drop lag 0 (always 1.0)
     } else {
-      res  <- stats::pacf(values, lag.max = lag_max, plot = FALSE)
+      res  <- stats::pacf(returns, lag.max = lag_max, plot = FALSE)
       vals <- as.numeric(res$acf)
     }
 
@@ -241,12 +253,15 @@ plot_stock <- function(data,
 #' Autocorrelation Function (ACF)
 #'
 #' @description
-#' Computes ACF values for one or more symbols and returns them as a long
-#' data.frame. Optionally produces a faceted bar-chart visualization.
+#' Calculates simple returns from the selected series and computes ACF values
+#' for one or more symbols. Results are returned as a long data.frame, with an
+#' optional faceted bar-chart visualization. Returns are calculated as
+#' \eqn{r_t = (x_t / x_{t-1}) - 1}.
 #'
 #' @param data Long data.frame (Date/Symbol/Column/Value) or wide xts.
 #' @param symbols character vector. One or more symbols (max 5). Required.
-#' @param column character. Series to use. Default: "Close".
+#' @param column character. Series from which simple returns are calculated.
+#'   Default: "Close".
 #' @param lag_max integer. Maximum lag. Default: 40.
 #' @param plot logical. If TRUE, returns a list with both the table and a
 #'   faceted ggplot. Default: FALSE (table only).
@@ -280,7 +295,7 @@ get_acf <- function(data,
   p <- ggplot2::ggplot(tbl, ggplot2::aes(x = lag, y = acf)) +
     ggplot2::geom_col(width = 0.5) +
     ggplot2::facet_wrap(~ symbol) +
-    ggplot2::labs(title = paste("ACF -", column),
+    ggplot2::labs(title = paste("ACF of", column, "Returns"),
                   x = "Lag", y = "ACF") +
     ggplot2::theme_minimal()
 
@@ -295,12 +310,15 @@ get_acf <- function(data,
 #' Partial Autocorrelation Function (PACF)
 #'
 #' @description
-#' Computes PACF values for one or more symbols and returns them as a long
-#' data.frame. Optionally produces a faceted bar-chart visualization.
+#' Calculates simple returns from the selected series and computes PACF values
+#' for one or more symbols. Results are returned as a long data.frame, with an
+#' optional faceted bar-chart visualization. Returns are calculated as
+#' \eqn{r_t = (x_t / x_{t-1}) - 1}.
 #'
 #' @param data Long data.frame (Date/Symbol/Column/Value) or wide xts.
 #' @param symbols character vector. One or more symbols (max 5). Required.
-#' @param column character. Series to use. Default: "Close".
+#' @param column character. Series from which simple returns are calculated.
+#'   Default: "Close".
 #' @param lag_max integer. Maximum lag. Default: 40.
 #' @param plot logical. If TRUE, returns a list with both the table and a
 #'   faceted ggplot. Default: FALSE (table only).
@@ -333,7 +351,7 @@ get_pacf <- function(data,
   p <- ggplot2::ggplot(tbl, ggplot2::aes(x = lag, y = pacf)) +
     ggplot2::geom_col(width = 0.5) +
     ggplot2::facet_wrap(~ symbol) +
-    ggplot2::labs(title = paste("PACF -", column),
+    ggplot2::labs(title = paste("PACF of", column, "Returns"),
                   x = "Lag", y = "PACF") +
     ggplot2::theme_minimal()
 
