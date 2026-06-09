@@ -65,6 +65,41 @@ test_that("change_period reaggregates monthly and quarterly OHLCV without paddin
   expect_equal(yearly_from_quarterly, yearly_direct)
 })
 
+test_that("change_period errors when target period is not coarser", {
+  d <- make_long_df(
+    symbols = "AAA",
+    columns = "Close",
+    n_days = 800,
+    start = as.Date("2020-01-01")
+  )
+  monthly <- change_period(d, period = "monthly")
+  quarterly <- change_period(d, period = "quarterly")
+  yearly <- change_period(d, period = "yearly")
+
+  expect_error(
+    change_period(monthly, period = "monthly"),
+    "Invalid period conversion from 'monthly' to 'monthly'"
+  )
+  expect_error(
+    change_period(quarterly, period = "monthly"),
+    "Invalid period conversion from 'quarterly' to 'monthly'"
+  )
+  expect_error(
+    change_period(yearly, period = "quarterly"),
+    "Invalid period conversion from 'yearly' to 'quarterly'"
+  )
+})
+
+test_that("change_period errors when input frequency cannot be determined", {
+  x <- xts::xts(100, order.by = as.Date("2024-01-01"))
+  colnames(x) <- "AAA_Close"
+
+  expect_error(
+    change_period(x, period = "monthly"),
+    "at least two observations"
+  )
+})
+
 test_that("change_period errors on invalid period", {
   d <- make_long_df(symbols = "AAA", columns = "Close", n_days = 30)
   # "daily" is intentionally not supported (would be a no-op on already-daily

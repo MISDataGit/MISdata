@@ -23,6 +23,10 @@
 #' message. To bypass OHLCV-aware mode and apply a single function to every
 #' column, pass \code{aggregate_fn} explicitly (e.g. \code{aggregate_fn = mean}).
 #'
+#' The target period must be strictly coarser than the input frequency.
+#' Requests that would keep the same frequency or disaggregate to a finer
+#' frequency fail with an error instead of returning unchanged values.
+#'
 #' Accepts long \code{data.frame} output from \code{get_stock()}; pivots to
 #' a wide \code{xts} internally and returns the result in the same shape as
 #' the input.
@@ -103,6 +107,25 @@ change_period <- function(data, period = "monthly", aggregate_fn = NULL) {
     x <- data
   } else {
     x <- tsbox::ts_xts(data)
+  }
+
+  # ---- validate aggregation direction ----
+  if (NROW(x) < 2L) {
+    stop("Cannot change period: at least two observations are required to ",
+         "determine the input frequency.")
+  }
+
+  period_rank <- c(
+    seconds = 1L, minute = 2L, hourly = 3L, daily = 4L,
+    weekly = 5L, monthly = 6L, quarterly = 7L, yearly = 8L
+  )
+  input_period <- suppressWarnings(xts::periodicity(x)$scale)
+  if (is.null(input_period) || !(input_period %in% names(period_rank))) {
+    stop("Cannot change period: input frequency could not be determined.")
+  }
+  if (period_rank[[period]] <= period_rank[[input_period]]) {
+    stop("Invalid period conversion from '", input_period, "' to '", period,
+         "': target period must be coarser than the input period.")
   }
 
   # ---- aggregate ----
