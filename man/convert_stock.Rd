@@ -29,6 +29,9 @@ Converted time series object of the requested type and layout.
 Bridges multiple time series object types using the \code{tsbox} package.
 Accepts \code{xts}, \code{tsibble}, \code{zoo}, \code{ts}, or \code{data.frame}
 inputs and converts them to the target type in either long or wide layout.
+Round-trip conversions are fully supported: for example, data converted to
+\code{tsibble} or \code{zoo} can be converted back to \code{xts} via
+\code{convert_stock(data, to = "xts")}.
 
 If the input is the long data.frame returned by \code{get_stock()} (columns:
 \code{Date}, \code{Symbol}, \code{Column}, \code{Value}), \code{Symbol} and
@@ -48,6 +51,13 @@ MIS_tsdata  <- convert_stock(MIS_data, to = "tsibble", format = "wide")
 
 # data.frame -> long data.frame (faceting)
 MIS_long    <- convert_stock(MIS_data, to = "df", format = "long")
+
+# Round-trip: tsibble -> xts
+MIS_xts     <- convert_stock(MIS_tsdata, to = "xts")
+
+# Round-trip: zoo -> xts
+MIS_zoo     <- convert_stock(MIS_data, to = "zoo")
+MIS_xts2    <- convert_stock(MIS_zoo, to = "xts")
 }
 
 }

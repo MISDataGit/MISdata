@@ -4,6 +4,9 @@
 #' Bridges multiple time series object types using the \code{tsbox} package.
 #' Accepts \code{xts}, \code{tsibble}, \code{zoo}, \code{ts}, or \code{data.frame}
 #' inputs and converts them to the target type in either long or wide layout.
+#' Round-trip conversions are fully supported: for example, data converted to
+#' \code{tsibble} or \code{zoo} can be converted back to \code{xts} via
+#' \code{convert_stock(data, to = "xts")}.
 #'
 #' If the input is the long data.frame returned by \code{get_stock()} (columns:
 #' \code{Date}, \code{Symbol}, \code{Column}, \code{Value}), \code{Symbol} and
@@ -38,9 +41,16 @@
 #'
 #' # data.frame -> long data.frame (faceting)
 #' MIS_long    <- convert_stock(MIS_data, to = "df", format = "long")
+#'
+#' # Round-trip: tsibble -> xts
+#' MIS_xts     <- convert_stock(MIS_tsdata, to = "xts")
+#'
+#' # Round-trip: zoo -> xts
+#' MIS_zoo     <- convert_stock(MIS_data, to = "zoo")
+#' MIS_xts2    <- convert_stock(MIS_zoo, to = "xts")
 #' }
 #'
-#' @importFrom tsbox ts_tsibble ts_zoo ts_ts ts_df ts_wide
+#' @importFrom tsbox ts_tsibble ts_xts ts_zoo ts_ts ts_df ts_wide
 #' @importFrom tidyr pivot_wider
 #' @importFrom dplyr mutate select arrange
 #' @importFrom xts xts
@@ -83,7 +93,7 @@ convert_stock <- function(data, to = "tsibble", format = "wide") {
   }
 
   converted <- switch(to,
-    "xts" = data,
+    "xts" = if (inherits(data, "xts")) data else tsbox::ts_xts(data),
     "zoo" = tsbox::ts_zoo(data),
     "ts"  = tsbox::ts_ts(data),
     "df"  = tsbox::ts_wide(tsbox::ts_df(data)),
